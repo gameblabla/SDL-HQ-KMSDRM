@@ -3597,7 +3597,14 @@ SDL_GL_ResetAttributes()
 #if SDL_VIDEO_OPENGL
     _this->gl_config.major_version = 2;
     _this->gl_config.minor_version = 1;
+    
+    #ifdef FORCEGLES_HACK
+    #warning "GKD MINI HACK"
+    _this->gl_config.profile_mask = SDL_GL_CONTEXT_PROFILE_ES;
+    #else
     _this->gl_config.profile_mask = 0;
+    #endif
+    
 #elif SDL_VIDEO_OPENGL_ES2
     _this->gl_config.major_version = 2;
     _this->gl_config.minor_version = 0;
@@ -3720,7 +3727,12 @@ SDL_GL_SetAttribute(SDL_GLattr attr, int value)
             retval = SDL_SetError("Unknown OpenGL context profile %d", value);
             break;
         }
+		#ifdef FORCEGLES_HACK
+		#warning "GKD MINI HACK"
+		_this->gl_config.profile_mask = SDL_GL_CONTEXT_PROFILE_ES;
+		#else
         _this->gl_config.profile_mask = value;
+        #endif
         break;
     case SDL_GL_SHARE_WITH_CURRENT_CONTEXT:
         _this->gl_config.share_with_current_context = value;
@@ -3913,12 +3925,17 @@ SDL_GL_GetAttribute(SDL_GLattr attr, int *value)
     case SDL_GL_CONTEXT_EGL:
         /* FIXME: SDL_GL_CONTEXT_EGL to be deprecated in SDL 2.1 */
         {
+			#ifdef FORCEGLES_HACK
+			#warning "GKD MINI HACK"
+			*value = 1;
+			#else
             if (_this->gl_config.profile_mask == SDL_GL_CONTEXT_PROFILE_ES) {
                 *value = 1;
             }
             else {
                 *value = 0;
             }
+            #endif
             return 0;
         }
     case SDL_GL_CONTEXT_FLAGS:
@@ -3928,7 +3945,11 @@ SDL_GL_GetAttribute(SDL_GLattr attr, int *value)
         }
     case SDL_GL_CONTEXT_PROFILE_MASK:
         {
+			#ifdef FORCEGLES_HACK
+			*value = SDL_GL_CONTEXT_PROFILE_ES;
+			#else
             *value = _this->gl_config.profile_mask;
+            #endif
             return 0;
         }
     case SDL_GL_SHARE_WITH_CURRENT_CONTEXT:
